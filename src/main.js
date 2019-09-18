@@ -3,7 +3,11 @@
 import Vue from 'vue';
 import App from './App';
 import router from './router';
+import Http from './plugins/https';
 
+import './assets/styles/base.css';
+
+Vue.use(Http);
 Vue.config.productionTip = false;
 
 /* eslint-disable no-new */

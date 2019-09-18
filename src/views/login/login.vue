@@ -1,20 +1,30 @@
 <template>
-  <div>
+  <div class="login-wrap">
     <el-form
       status-icon
       ref="loginForm"
       label-position="right"
       label-width="100px"
       :model="loginForm"
-      :rules="rules">
+      :rules="rules"
+      class="login-form">
+      <h2 class="title">用户登录</h2>
       <el-form-item label="用户名" prop="username">
         <el-input v-model="loginForm.username" autocomplete="off" placeholder="请输入用户名"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="password">
-        <el-input v-model="loginForm.password" type="password" autocomplete="off"></el-input>
+        <el-input
+          v-model="loginForm.password"
+          type="password"
+          autocomplete="off"
+          placeholder="请输入密码"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" :loading="loginForm.loginState" @click="submitForm('loginForm')">提交</el-button>
+        <el-button
+          class="submit-btn"
+          type="primary"
+          :loading="loginForm.loginState"
+          @click="submitForm">提交</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -61,12 +71,30 @@ export default {
     };
   },
   methods: {
-    submitForm(form) {
+    submitForm() {
     },
   },
 };
 </script>
 
 <style scoped>
-
+.login-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-color: #324152;
+}
+.login-wrap .login-form {
+  padding: 30px;
+  width: 400px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+.login-form .title {
+  text-align: center;
+}
+.login-wrap .submit-btn {
+  width: 100%;
+}
 </style>
