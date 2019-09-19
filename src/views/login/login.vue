@@ -4,7 +4,6 @@
       status-icon
       ref="loginForm"
       label-position="right"
-      label-width="100px"
       :model="loginForm"
       :rules="rules"
       class="login-form">
@@ -23,8 +22,9 @@
         <el-button
           class="submit-btn"
           type="primary"
-          :loading="loginForm.loginState"
-          @click="submitForm">提交</el-button>
+          :loading="loginForm.loadingState"
+          :disabled="loginForm.disabledState"
+          @click.prevent="submitForm('loginForm')">登录</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -32,7 +32,7 @@
 
 <script>
 import Vue from 'vue';
-import { Form, FormItem, Button, Input } from 'element-ui';
+import { Form, FormItem, Button, Input, Message } from 'element-ui';
 
 Vue.use(Form);
 Vue.use(FormItem);
@@ -42,9 +42,25 @@ Vue.use(Button);
 export default {
   name: 'login',
   data() {
+    const changeState = (state) => {
+      this.loginForm.disabledState = state;
+    };
+
+    const validateUsernameAndPassword = (form) => {
+      if (form.username.trim() && form.password.trim()) {
+        changeState(false);
+        return true;
+      }
+      changeState(true);
+      return false;
+    };
+
     const validateUsername = (rule, value, callback) => {
       if (!value.trim()) {
         callback(new Error('请输入用户名'));
+      }
+      if (validateUsernameAndPassword(this.loginForm)) {
+        callback();
       }
     };
 
@@ -52,28 +68,62 @@ export default {
       if (!value.trim()) {
         callback(new Error('请输入密码'));
       }
+      const valLen = value.length;
+      if (valLen < 6 || valLen > 32) {
+        callback(new Error('密码长度为6至32'));
+      }
+      if (validateUsernameAndPassword(this.loginForm)) {
+        callback();
+      }
     };
 
     return {
       loginForm: {
         username: '',
         password: '',
-        loginState: false,
+        disabledState: true,
+        loadingState: false
       },
       rules: {
         username: {
-          validator: validateUsername,
+          validator: validateUsername
         },
         password: {
-          validator: validatePassword,
-        },
-      },
+          validator: validatePassword
+        }
+      }
     };
   },
   methods: {
-    submitForm() {
+    async login() {
+      const { username, password } = this.loginForm;
+      const result = await this.$http.post('login', { username, password });
+      if (result.status === 200) {
+        const { data, meta: { msg, status } } = result.data;
+        let type = 'warning';
+        if (status === 200) {
+          type = 'success';
+          localStorage.setItem('business_token', data.token);
+          this.$router.push({ name: 'home' });
+        }
+        Message({ message: msg, type });
+        this.loginForm.loadingState = false;
+      } else {
+        Message.error('请求错误');
+        this.loginForm.loadingState = false;
+      }
     },
-  },
+    submitForm(form) {
+      this.$refs[form].validate((valid) => {
+        if (valid) {
+          this.loginForm.loadingState = true;
+          this.login();
+        } else {
+          console.error('输入信息有误');
+        }
+      });
+    }
+  }
 };
 </script>
 
