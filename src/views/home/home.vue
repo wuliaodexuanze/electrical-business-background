@@ -9,18 +9,18 @@
         </el-col>
         <el-col :span="2" :offset="18">
           <div class="grid-content bg-purple header-right">
-            <el-dropdown>
-            <span class="el-dropdown-link">
-              <i class="el-icon-user-solid el-icon--left"></i>
-              用户名
-              <i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item icon="el-icon-switch-button">
-                退出
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
+            <el-dropdown @command="handleLogout">
+              <span class="el-dropdown-link">
+                <i class="el-icon-user-solid el-icon--left"></i>
+                <span v-text="username"></span>
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item icon="el-icon-switch-button">
+                  退出
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </div>
         </el-col>
       </el-row>
@@ -32,13 +32,14 @@
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b"
-          :unique-opened="true">
+          :unique-opened="true"
+          :router="true">
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-location"></i>
               <span>用户管理</span>
             </template>
-            <el-menu-item index="1-1">
+            <el-menu-item index="users">
               <i class="el-icon-location"></i>
               <span>用户列表</span>
             </el-menu-item>
@@ -98,7 +99,9 @@
         </el-menu>
       </el-aside>
       <el-container>
-        <el-main class="main-box">Main</el-main>
+        <el-main class="main-box">
+          <router-view></router-view>
+        </el-main>
         <el-footer
           class="footer-box">&copy;&nbsp;2019-2019&nbsp;by&nbsp;1169655050@qq.com</el-footer>
       </el-container>
@@ -115,7 +118,13 @@ import {
   Aside,
   Main,
   Row,
-  Col, Dropdown, DropdownMenu, DropdownItem, Menu, MenuItem, Submenu } from 'element-ui';
+  Col,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  Menu,
+  MenuItem,
+  Submenu, Message } from 'element-ui';
 
 Vue.use(Container);
 Vue.use(Header);
@@ -132,7 +141,29 @@ Vue.use(MenuItem);
 Vue.use(Submenu);
 
 export default {
-  name: 'home'
+  name: 'home',
+  data() {
+    return {
+      username: ''
+    };
+  },
+  beforeCreate() {
+    const token = localStorage.getItem('business_token');
+    const username = localStorage.getItem('business_username');
+    if (!token && !username) {
+      this.$router.push({ name: 'login' });
+    }
+  },
+  mounted() {
+    this.username = localStorage.getItem('business_username');
+  },
+  methods: {
+    handleLogout() {
+      localStorage.clear();
+      Message.success('退出成功');
+      this.$router.push({ name: 'login' });
+    }
+  }
 };
 </script>
 
@@ -151,10 +182,7 @@ export default {
     text-align: center;
   }
   .aside-box {
-    position: fixed;
-    top: 60px;
-    bottom: 0;
-    left: 0;
+    float: left;
     overflow: hidden;
     height: 100%;
   }
@@ -162,11 +190,7 @@ export default {
     height: 100%;
     overflow-y: auto;
   }
-  .aside-box .aside-nav .el-menu {
-    overflow: hidden;
-  }
   .main-box {
-    padding-left: 240px;
     height: 100%;
     background-color: #e9eef3;
   }

@@ -104,6 +104,7 @@ export default {
         if (status === 200) {
           type = 'success';
           localStorage.setItem('business_token', data.token);
+          localStorage.setItem('business_username', data.username);
           this.$router.push({ name: 'home' });
         }
         Message({ message: msg, type });

@@ -27,6 +27,7 @@ module.exports = {
   rules: {
     "no-console": "off",
     "comma-dangle": ["error", "never"],
+    "dot-notation": "off",
     // don't require .vue extension when importing
     'import/extensions': ['error', 'always', {
       js: 'never',
