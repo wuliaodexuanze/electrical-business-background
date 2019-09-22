@@ -153,6 +153,7 @@ export default {
     if (!token && !username) {
       this.$router.push({ name: 'login' });
     }
+    this.$http.defaults.headers.common['Authorization'] = token;
   },
   mounted() {
     this.username = localStorage.getItem('business_username');
@@ -192,6 +193,7 @@ export default {
   }
   .main-box {
     height: 100%;
+    overflow: hidden;
     background-color: #e9eef3;
   }
   .footer-box {

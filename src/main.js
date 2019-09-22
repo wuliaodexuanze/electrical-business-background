@@ -4,11 +4,13 @@ import Vue from 'vue';
 import App from './App';
 import router from './router';
 import Http from './plugins/https';
+import fmtDate from './filters/fmtDate';
 
 import './assets/styles/base.css';
 
 Vue.use(Http);
 Vue.config.productionTip = false;
+Vue.filter('fmtDate', fmtDate);
 
 /* eslint-disable no-new */
 new Vue({

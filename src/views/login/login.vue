@@ -59,6 +59,10 @@ export default {
       if (!value.trim()) {
         callback(new Error('请输入用户名'));
       }
+      const valLen = value.length;
+      if (valLen < 3 || valLen > 32) {
+        callback(new Error('用户名长度为4至32'));
+      }
       if (validateUsernameAndPassword(this.loginForm)) {
         callback();
       }
@@ -101,7 +105,7 @@ export default {
       if (result.status === 200) {
         const { data, meta: { msg, status } } = result.data;
         let type = 'warning';
-        if (status === 200) {
+        if (status.toString().startsWith('2')) {
           type = 'success';
           localStorage.setItem('business_token', data.token);
           localStorage.setItem('business_username', data.username);
