@@ -2,7 +2,8 @@
   <el-card
     class="users-wrap"
     :body-style="{height:'100%'}"
-    v-loading="loading">
+    v-loading="loading"
+    element-loading-text="加载中...">
     <div
       slot="header"
       class="clearfix">
@@ -70,7 +71,8 @@
             <el-switch
               v-model="scope.row.mg_state"
               active-color="#13ce66"
-              inactive-color="#ff4949">
+              inactive-color="#ff4949"
+              @change="handleChangeState(scope.row)">
             </el-switch>
           </template>
         </el-table-column>
@@ -96,13 +98,13 @@
                 plain
                 circle></el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" :hide-after="400" content="确认" placement="top-start">
+            <el-tooltip effect="dark" :hide-after="400" content="分配角色" placement="top-start">
               <el-button
                 type="success"
-                icon="el-icon-check"
+                icon="el-icon-setting"
                 size="mini"
                 plain
-                @click="handleAffirm"
+                @click="handleAffirm(scope.row)"
                 circle></el-button>
             </el-tooltip>
           </template>
@@ -177,19 +179,8 @@
           <el-form :model="editUserForm" ref="editUserForm" :rules="userInfoRules">
             <el-form-item
               label="用户名"
-              label-width="100px"
-              :rules="[
-                { required: true, message: '用户名不能为空' },
-                { min:4, message: '用户名长度不能小于4' },
-                { max:32, message: '用户名长度不能大于32' }
-              ]"
-              prop="username">
-              <el-input
-                autocomplete="off"
-                clearable
-                v-model="editUserForm.username"
-                placeholder="请输入用户名"
-                disabled></el-input>
+              label-width="100px">
+              <div v-text="editUserForm.username"></div>
             </el-form-item>
             <el-form-item
               label="邮箱"
@@ -220,7 +211,41 @@
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogEditFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="addUserSubmit('editUserForm')">确 定</el-button>
+            <el-button type="primary" @click="editUserSubmit('editUserForm')">确 定</el-button>
+          </div>
+        </el-dialog>
+      <el-dialog
+        title="分配角色"
+        :visible.sync="dialogAffirmFormVisible"
+        :close-on-click-modal="false">
+          <el-form :model="affirmUserForm" ref="affirmUserForm">
+            <el-form-item
+              label="用户名"
+              label-width="100px">
+              <div v-text="affirmUserForm.username"></div>
+            </el-form-item>
+            <el-form-item
+              label="角色"
+              label-width="100px">
+              <el-select
+                v-model="affirmUserForm.roleId"
+                placeholder="请选择角色">
+                <el-option
+                  label="请选择"
+                  :value="-1">
+                </el-option>
+                <el-option
+                  v-for="item in roles"
+                  :key="item.id"
+                  :label="item.roleName"
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogAffirmFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="handleRoleSubmit('affirmUserForm')">确 定</el-button>
           </div>
         </el-dialog>
       <el-pagination
@@ -256,7 +281,9 @@ import {
   Switch,
   Tooltip,
   Dialog,
-  MessageBox
+  MessageBox,
+  Select,
+  Option
 } from 'element-ui';
 
 Vue.use(Card);
@@ -273,6 +300,8 @@ Vue.use(Loading);
 Vue.use(Switch);
 Vue.use(Tooltip);
 Vue.use(Dialog);
+Vue.use(Select);
+Vue.use(Option);
 
 export default {
   name: 'users',
@@ -298,6 +327,11 @@ export default {
         email: '',
         mobile: ''
       },
+      affirmUserForm: {
+        id: '',
+        username: '',
+        roleId: -1
+      },
       query: '',
       pagenum: 1,
       pagesizes: [2, 3, 5, 10],
@@ -307,15 +341,20 @@ export default {
       loading: true,
       dialogAddFormVisible: false,
       dialogEditFormVisible: false,
+      dialogAffirmFormVisible: false,
       userInfoRules: {
         mobile: [{ validator: checkMobile, trigger: 'blur' }]
-      }
+      },
+      roles: []
     };
   },
   created() {
     this.getUserList();
   },
   methods: {
+    handleRoleSubmit() {
+      this.changeRole();
+    },
     handleSizeChange(val = 20) {
       this.pagesize = val;
       this.pagenum = 1;
@@ -350,7 +389,12 @@ export default {
         });
       }
     },
-    handleAffirm() {},
+    handleChangeState(row) {
+      const { id, mg_state: mgState } = row;
+      if (id) {
+        this.changeState(id, mgState);
+      }
+    },
     searchUser() {
       this.getUserList();
     },
@@ -364,13 +408,104 @@ export default {
         }
       });
     },
-    async editUser() {
-      const ret = await this.$http.delete('users');
+    editUserSubmit(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.loading = true;
+          this.editUser();
+        } else {
+          Message.warning('数据格式不符合提交要求,注意检查数据填写数据格式！');
+        }
+      });
+    },
+    async changeState(id, type) {
+      const ret = await this.$http.put(`users/${id}/state/${type}`);
       this.loading = false;
       const { data: { meta }, status } = ret;
       if (status === 200) {
         if (meta.status.toString().startsWith('2')) {
           Message.success(meta.msg);
+          this.getUserList();
+        } else {
+          Message.warning(meta.msg);
+        }
+      } else {
+        Message.error('请求错误');
+      }
+    },
+    async getRoleId(id = '') {
+      if (id) {
+        const ret = await this.$http.get(`users/${id}`);
+        this.loading = false;
+        const { data: { data, meta }, status } = ret;
+        if (status === 200) {
+          if (meta.status.toString().startsWith('2')) {
+            return data;
+          }
+          Message.warning(meta.msg);
+        } else {
+          Message.error('请求错误');
+        }
+      } else {
+        Message.error('用户角色错误');
+      }
+      return '';
+    },
+    async getRoles() {
+      const ret = await this.$http.get('roles');
+      this.loading = false;
+      const { data: { data, meta }, status } = ret;
+      if (status === 200) {
+        if (meta.status.toString().startsWith('2')) {
+          return data;
+        }
+        Message.warning(meta.msg);
+      } else {
+        Message.error('请求错误');
+      }
+      return [];
+    },
+    async handleAffirm(row) {
+      const { username, id } = row;
+      if (username && id) {
+        const roles = await this.getRoles();
+        const role = await this.getRoleId(id);
+        this.roles = roles || [];
+        if (role !== '') {
+          this.affirmUserForm.id = id;
+          this.affirmUserForm.username = username;
+          this.affirmUserForm.roleId = role.rid;
+          this.dialogAffirmFormVisible = true;
+        }
+      }
+    },
+    async changeRole() {
+      const { id, roleId } = this.affirmUserForm;
+      const ret = await this.$http.put(`users/${id}/role`, { rid: roleId });
+      this.loading = false;
+      const { data: { meta }, status } = ret;
+      if (status === 200) {
+        if (meta.status.toString().startsWith('2')) {
+          this.dialogAffirmFormVisible = false;
+          Message.success(meta.msg);
+          this.affirmUserForm = {};
+        } else {
+          Message.warning(meta.msg);
+        }
+      } else {
+        Message.error('请求错误');
+      }
+    },
+    async editUser() {
+      const { id, ...others } = this.editUserForm;
+      const ret = await this.$http.put(`users/${id}`, others);
+      this.loading = false;
+      const { data: { meta }, status } = ret;
+      if (status === 200) {
+        if (meta.status.toString().startsWith('2')) {
+          this.dialogEditFormVisible = false;
+          Message.success(meta.msg);
+          this.editUserForm = {};
           this.getUserList();
         } else {
           Message.warning(meta.msg);

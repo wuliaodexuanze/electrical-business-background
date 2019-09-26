@@ -25,9 +25,11 @@ module.exports = {
   },
   // add your custom rules here
   rules: {
-    "no-console": "off",
-    "comma-dangle": ["error", "never"],
-    "dot-notation": "off",
+    'no-console': 'off',
+    'comma-dangle': ['error', 'never'],
+    'dot-notation': 'off',
+    'properties': 'never',
+    'ignoreDestructuring': false, // 驼峰命名
     // don't require .vue extension when importing
     'import/extensions': ['error', 'always', {
       js: 'never',
