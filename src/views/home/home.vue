@@ -34,66 +34,20 @@
           active-text-color="#ffd04b"
           :unique-opened="true"
           :router="true">
-          <el-submenu index="1">
+          <el-submenu
+            v-for="(item, index) in permissions"
+            :key="item.id"
+            :index="index.toString()">
             <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <i class="el-icon-menu"></i>
+              <span v-text="item.authName"></span>
             </template>
-            <el-menu-item index="users">
-              <i class="el-icon-location"></i>
-              <span>用户列表</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item index="2-1">
-              <i class="el-icon-location"></i>
-              <span>角色列表</span>
-            </el-menu-item>
-            <el-menu-item index="2-2">
-              <i class="el-icon-location"></i>
-              <span>权限列表</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="3">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>商品管理</span>
-            </template>
-            <el-menu-item index="3-1">
-              <i class="el-icon-location"></i>
-              <span>商品列表</span>
-            </el-menu-item>
-            <el-menu-item index="3-2">
-              <i class="el-icon-location"></i>
-              <span>分类参数</span>
-            </el-menu-item>
-            <el-menu-item index="3-3">
-              <i class="el-icon-location"></i>
-              <span>商品分类</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="4">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>订单管理</span>
-            </template>
-            <el-menu-item index="4-1">
-              <i class="el-icon-location"></i>
-              <span>订单列表</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="5">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>数据统计</span>
-            </template>
-            <el-menu-item index="5-1">
-              <i class="el-icon-location"></i>
-              <span>数据报表</span>
+            <el-menu-item
+              v-for="(subItem) in item.children"
+              :key="subItem.id"
+              :index="subItem.path">
+              <i class="el-icon-s-grid"></i>
+              <span v-text="subItem.authName"></span>
             </el-menu-item>
           </el-submenu>
         </el-menu>
@@ -124,7 +78,9 @@ import {
   DropdownItem,
   Menu,
   MenuItem,
-  Submenu, Message } from 'element-ui';
+  Submenu,
+  Message
+} from 'element-ui';
 
 Vue.use(Container);
 Vue.use(Header);
@@ -144,25 +100,39 @@ export default {
   name: 'home',
   data() {
     return {
-      username: ''
+      username: '',
+      loading: false,
+      permissions: []
     };
-  },
-  beforeCreate() {
-    const token = localStorage.getItem('business_token');
-    const username = localStorage.getItem('business_username');
-    if (!token && !username) {
-      this.$router.push({ name: 'login' });
-    }
-    this.$http.defaults.headers.common['Authorization'] = token;
   },
   mounted() {
     this.username = localStorage.getItem('business_username');
+  },
+  created() {
+    this.getPermissions();
   },
   methods: {
     handleLogout() {
       localStorage.clear();
       Message.success('退出成功');
       this.$router.push({ name: 'login' });
+    },
+    async getPermissions() {
+      this.loading = true;
+      const result = await this.$http.get('/rights/tree');
+      this.loading = false;
+      const { data, status } = result;
+      if (status === 200) {
+        const { data: retData, meta } = data;
+        if (meta.status.toString().startsWith('2')) {
+          this.permissions = retData;
+        } else {
+          Message.warning(meta.msg);
+          this.$router.push({ name: 'login' });
+        }
+      } else {
+        Message.error('网络请求失败');
+      }
     }
   }
 };

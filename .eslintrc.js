@@ -29,6 +29,7 @@ module.exports = {
     'comma-dangle': ['error', 'never'],
     'dot-notation': 'off',
     'properties': 'never',
+    'arrow-body-style': 'off',
     'ignoreDestructuring': false, // 驼峰命名
     // don't require .vue extension when importing
     'import/extensions': ['error', 'always', {

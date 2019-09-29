@@ -7,13 +7,16 @@
     <div
       slot="header"
       class="clearfix">
-      <el-breadcrumb>
-        <el-breadcrumb-item><a href="/">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item><a href="/">用户管理</a></el-breadcrumb-item>
-        <el-breadcrumb-item>用户列表列表</el-breadcrumb-item>
-      </el-breadcrumb>
+      <bread-crumb :crumbs="crumbs"></bread-crumb>
       <el-row :gutter="20" class="search-box">
-        <el-col :span="8">
+        <el-col :span="2">
+          <el-button
+            @click="dialogAddFormVisible = true"
+            icon="el-icon-user"
+            type="primary"
+            plain>添加用户</el-button>
+        </el-col>
+        <el-col :span="8" :offset="14">
           <el-input
             placeholder="请输入姓名"
             v-model="query"
@@ -22,19 +25,11 @@
             <el-button @click="searchUser" slot="append" icon="el-icon-search"></el-button>
           </el-input>
         </el-col>
-        <el-col :span="2">
-          <el-button
-            @click="dialogAddFormVisible = true"
-            icon="el-icon-user"
-            type="primary"
-            plain>添加用户</el-button>
-        </el-col>
       </el-row>
     </div>
     <div class="body-box">
       <el-table
         :data="userLists"
-        border
         height="570"
         class="table-box">
         <el-table-column
@@ -315,6 +310,11 @@ export default {
       }
     };
     return {
+      crumbs: [
+        { name: '首页', url: '/' },
+        { name: '用户管理', url: '/' },
+        { name: '用户列表' }
+      ],
       addUserForm: {
         username: '',
         password: '',
@@ -386,7 +386,7 @@ export default {
         }).then(() => {
           this.loading = true;
           this.deleteUser(id);
-        });
+        }).catch(() => {});
       }
     },
     handleChangeState(row) {
@@ -419,6 +419,7 @@ export default {
       });
     },
     async changeState(id, type) {
+      this.loading = true;
       const ret = await this.$http.put(`users/${id}/state/${type}`);
       this.loading = false;
       const { data: { meta }, status } = ret;
@@ -435,6 +436,7 @@ export default {
     },
     async getRoleId(id = '') {
       if (id) {
+        this.loading = true;
         const ret = await this.$http.get(`users/${id}`);
         this.loading = false;
         const { data: { data, meta }, status } = ret;
@@ -452,6 +454,7 @@ export default {
       return '';
     },
     async getRoles() {
+      this.loading = true;
       const ret = await this.$http.get('roles');
       this.loading = false;
       const { data: { data, meta }, status } = ret;
@@ -481,6 +484,7 @@ export default {
     },
     async changeRole() {
       const { id, roleId } = this.affirmUserForm;
+      this.loading = true;
       const ret = await this.$http.put(`users/${id}/role`, { rid: roleId });
       this.loading = false;
       const { data: { meta }, status } = ret;
@@ -498,6 +502,7 @@ export default {
     },
     async editUser() {
       const { id, ...others } = this.editUserForm;
+      this.loading = true;
       const ret = await this.$http.put(`users/${id}`, others);
       this.loading = false;
       const { data: { meta }, status } = ret;
@@ -515,6 +520,7 @@ export default {
       }
     },
     async deleteUser(id) {
+      this.loading = true;
       const ret = await this.$http.delete(`users/${id}`);
       this.loading = false;
       const { data: { meta }, status } = ret;
@@ -531,6 +537,7 @@ export default {
       }
     },
     async addUser() {
+      this.loading = true;
       const ret = await this.$http.post('users', this.addUserForm);
       this.loading = false;
       const { data: { meta }, status } = ret;
@@ -548,6 +555,7 @@ export default {
       }
     },
     async getUserList() {
+      this.loading = true;
       const result = await this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`);
       this.loading = false;
       const { data, status } = result;
