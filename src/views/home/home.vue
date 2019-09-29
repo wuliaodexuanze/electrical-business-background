@@ -119,7 +119,7 @@ export default {
     },
     async getPermissions() {
       this.loading = true;
-      const result = await this.$http.get('/rights/tree');
+      const result = await this.$http.get('menus');
       this.loading = false;
       const { data, status } = result;
       if (status === 200) {

@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import { Message } from 'element-ui';
 import Login from '@/views/login/login';
 import Home from '@/views/home/home';
 import Users from '@/views/users/users';
@@ -8,7 +9,7 @@ import Roles from '@/views/permissions/roles';
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/',
@@ -39,3 +40,18 @@ export default new Router({
     }
   ]
 });
+
+// 路由守卫，路由配置之前生效
+router.beforeEach((to, form, next) => {
+  if (to.path !== '/login') {
+    const token = localStorage.getItem('business_token');
+    if (!token) {
+      Message.error('请登录');
+      router.push({ name: 'login' });
+      return;
+    }
+  }
+  next();
+});
+
+export default router;

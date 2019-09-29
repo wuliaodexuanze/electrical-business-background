@@ -113,9 +113,6 @@ export default {
         }
         Message({ message: msg, type });
         this.loginForm.loadingState = false;
-      } else {
-        Message.error('请求错误');
-        this.loginForm.loadingState = false;
       }
     },
     submitForm(form) {

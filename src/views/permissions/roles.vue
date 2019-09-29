@@ -364,8 +364,6 @@ export default {
           Message.warning(meta.msg);
           this.$router.push({ name: 'login' });
         }
-      } else {
-        Message.error('网络请求失败');
       }
     },
     async deletePermission(role = {}, permissionId) {
@@ -383,8 +381,6 @@ export default {
           Message.warning(meta.msg);
           this.$router.push({ name: 'login' });
         }
-      } else {
-        Message.error('网络请求失败');
       }
     },
     async getPermissions() {
@@ -400,8 +396,6 @@ export default {
           Message.warning(meta.msg);
           this.$router.push({ name: 'login' });
         }
-      } else {
-        Message.error('网络请求失败');
       }
     },
     async updateRoles(rids) {
@@ -420,8 +414,6 @@ export default {
             Message.warning(meta.msg);
             this.$router.push({ name: 'login' });
           }
-        } else {
-          Message.error('网络请求失败');
         }
       }
     },
@@ -439,8 +431,6 @@ export default {
         } else {
           Message.warning(meta.msg);
         }
-      } else {
-        Message.error('请求错误');
       }
     },
     async deleteRole(id) {
@@ -455,8 +445,6 @@ export default {
         } else {
           Message.warning(meta.msg);
         }
-      } else {
-        Message.error('请求错误');
       }
     },
     async updateRoleInfo() {
@@ -474,8 +462,6 @@ export default {
         } else {
           Message.warning(meta.msg);
         }
-      } else {
-        Message.error('请求错误');
       }
     }
   }

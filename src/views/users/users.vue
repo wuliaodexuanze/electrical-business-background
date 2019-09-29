@@ -445,8 +445,6 @@ export default {
             return data;
           }
           Message.warning(meta.msg);
-        } else {
-          Message.error('请求错误');
         }
       } else {
         Message.error('用户角色错误');
@@ -463,8 +461,6 @@ export default {
           return data;
         }
         Message.warning(meta.msg);
-      } else {
-        Message.error('请求错误');
       }
       return [];
     },
@@ -496,8 +492,6 @@ export default {
         } else {
           Message.warning(meta.msg);
         }
-      } else {
-        Message.error('请求错误');
       }
     },
     async editUser() {
@@ -515,8 +509,6 @@ export default {
         } else {
           Message.warning(meta.msg);
         }
-      } else {
-        Message.error('请求错误');
       }
     },
     async deleteUser(id) {
@@ -532,8 +524,6 @@ export default {
         } else {
           Message.warning(meta.msg);
         }
-      } else {
-        Message.error('请求错误');
       }
     },
     async addUser() {
@@ -550,8 +540,6 @@ export default {
         } else {
           Message.warning(meta.msg);
         }
-      } else {
-        Message.error('请求错误');
       }
     },
     async getUserList() {
@@ -570,8 +558,6 @@ export default {
           Message.warning(meta.msg);
           this.$router.push({ name: 'login' });
         }
-      } else {
-        Message.error('网络请求失败');
       }
     }
   }

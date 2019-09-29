@@ -84,8 +84,6 @@ export default {
           Message.warning(meta.msg);
           this.$router.push({ name: 'login' });
         }
-      } else {
-        Message.error('网络请求失败');
       }
     }
   }
