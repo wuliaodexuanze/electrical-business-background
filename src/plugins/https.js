@@ -5,7 +5,7 @@ import { Message } from 'element-ui';
 const Http = {};
 Http.install = (Vue) => {
   const vue = Vue;
-  axios.defaults.baseURL = 'http://39.108.193.251:888/api/private/v1/';
+  axios.defaults.baseURL = 'http://39.108.193.251:8888/api/private/v1/';
   axios.interceptors.request.use((config) => {
     const conf = config;
     if (conf.url !== 'login') {

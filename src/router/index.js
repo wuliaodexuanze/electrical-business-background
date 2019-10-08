@@ -6,6 +6,8 @@ import Home from '@/views/home/home';
 import Users from '@/views/users/users';
 import Permissions from '@/views/permissions/permissions';
 import Roles from '@/views/permissions/roles';
+import Goods from '@/views/goods/goodslist';
+import GoodsAdd from '@/views/goods/goodsAdd';
 
 Vue.use(Router);
 
@@ -30,6 +32,16 @@ const router = new Router({
           path: 'roles',
           name: 'roles',
           component: Roles
+        },
+        {
+          path: 'goods',
+          name: 'goods',
+          component: Goods
+        },
+        {
+          path: 'goodsadd',
+          name: 'goodsadd',
+          component: GoodsAdd
         }
       ]
     },

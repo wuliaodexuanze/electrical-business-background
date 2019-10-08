@@ -236,7 +236,7 @@ export default {
     return {
       crumbs: [
         { name: '首页', url: '/' },
-        { name: '权限管理', url: '/' },
+        { name: '权限管理', url: '/roles' },
         { name: '角色列表' }
       ],
       editRoleForm: {

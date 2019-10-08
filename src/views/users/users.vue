@@ -312,7 +312,7 @@ export default {
     return {
       crumbs: [
         { name: '首页', url: '/' },
-        { name: '用户管理', url: '/' },
+        { name: '用户管理', url: '/users' },
         { name: '用户列表' }
       ],
       addUserForm: {
@@ -553,7 +553,7 @@ export default {
           const { users = [], pagenum = 1, total = 0 } = retData;
           this.userLists = users;
           this.total = total;
-          this.pagenum = pagenum;
+          this.pagenum = Number(pagenum);
         } else {
           Message.warning(meta.msg);
           this.$router.push({ name: 'login' });

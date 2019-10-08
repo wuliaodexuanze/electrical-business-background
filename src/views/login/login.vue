@@ -1,22 +1,30 @@
 <template>
   <div class="login-wrap">
     <el-form
-      status-icon
       ref="loginForm"
       label-position="right"
       :model="loginForm"
       :rules="rules"
       class="login-form">
-      <h2 class="title">用户登录</h2>
-      <el-form-item label="用户名" prop="username">
-        <el-input v-model="loginForm.username" autocomplete="off" placeholder="请输入用户名"></el-input>
+      <h2 class="title">后台管理系统</h2>
+      <el-form-item prop="username">
+        <el-input
+          v-model="loginForm.username"
+          autocomplete="off"
+          clearable
+          placeholder="请输入用户名">
+          <template slot="prepend"><i class="el-icon-user-solid"></i></template>
+        </el-input>
       </el-form-item>
-      <el-form-item label="密码" prop="password">
+      <el-form-item prop="password">
         <el-input
           v-model="loginForm.password"
-          type="password"
           autocomplete="off"
-          placeholder="请输入密码"></el-input>
+          clearable
+          show-password
+          placeholder="请输入密码">
+          <template slot="prepend"><i class="el-icon-lock"></i></template>
+        </el-input>
       </el-form-item>
       <el-form-item>
         <el-button
@@ -140,10 +148,11 @@ export default {
 .login-wrap .login-form {
   padding: 30px;
   width: 400px;
-  border-radius: 5px;
-  background-color: #fff;
 }
 .login-form .title {
+  font-size: 30px;
+  font-weight: 500;
+  color: #fefefe;
   text-align: center;
 }
 .login-wrap .submit-btn {

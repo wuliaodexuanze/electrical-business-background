@@ -59,7 +59,7 @@ export default {
     return {
       crumbs: [
         { name: '首页', url: '/' },
-        { name: '权限管理', url: '/' },
+        { name: '权限管理', url: '/rights' },
         { name: '权限列表' }
       ],
       levels: ['一级', '二级', '三级'],

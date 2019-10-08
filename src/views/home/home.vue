@@ -4,13 +4,13 @@
       <el-row>
         <el-col :span="4">
           <div class="grid-content bg-purple header-left">
-            <img src="../../assets/logo.png" height="100%" alt="logo">
+            <h1 class="title">1169655050@qq.com</h1>
           </div>
         </el-col>
         <el-col :span="2" :offset="18">
           <div class="grid-content bg-purple header-right">
             <el-dropdown @command="handleLogout">
-              <span class="el-dropdown-link">
+              <span class="el-dropdown-link info-text">
                 <i class="el-icon-user-solid el-icon--left"></i>
                 <span v-text="username"></span>
                 <i class="el-icon-arrow-down el-icon--right"></i>
@@ -29,9 +29,9 @@
       <el-aside class="aside-box" width="240px">
         <el-menu
           class="aside-nav"
-          background-color="#545c64"
+          background-color="#383e4b"
           text-color="#fff"
-          active-text-color="#ffd04b"
+          active-text-color="#f96332"
           :unique-opened="true"
           :router="true">
           <el-submenu
@@ -143,14 +143,22 @@ export default {
     height: 100%;
   }
   .header-box {
-    background-color: #f8f8f8;
+    background-color: #36a9e1;
   }
   .header-box .header-left {
     height: 60px;
   }
+  .header-box .header-left .title {
+    font-size: 20px;
+    color: #fff;
+    line-height: 60px;
+  }
   .header-box .header-right {
     line-height: 60px;
     text-align: center;
+  }
+  .header-box .header-right .info-text {
+    color: #fff;
   }
   .aside-box {
     float: left;
@@ -164,11 +172,10 @@ export default {
   .main-box {
     height: 100%;
     overflow: hidden;
-    background-color: #e9eef3;
+    background-color: #f5f5f5;
   }
   .footer-box {
     line-height: 60px;
-    background-color: #bfc6ce;
     text-align: center;
     color: #666;
   }
