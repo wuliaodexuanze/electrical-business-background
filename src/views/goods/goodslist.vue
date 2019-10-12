@@ -115,8 +115,7 @@
           <el-tabs
             tab-position="left"
             class="tabs"
-            v-model="stepActive"
-            @tab-click="handleTabClick">
+            v-model="stepActive">
             <el-tab-pane class="tab-pane" name="1" label="商品参数">
               <el-form-item
                 label="商品名称"
@@ -193,9 +192,9 @@
             <el-tab-pane class="tab-pane" name="4" label="商品图片">
               <el-form-item>
                 <el-upload
-                  action="http://39.108.193.251:8888/api/private/v1/upload"
+                  :action="uploadUrl"
                   :headers="uploadHeaders"
-                  :file-list="picList"
+                  :file-list="currentPicList"
                   :on-success="handleUploadSuccess"
                   :on-remove="handleUploadRemove"
                   accept="image/png, image/jpeg, image/jpg"
@@ -221,7 +220,7 @@
               <el-button
                 class="add-btn"
                 type="primary"
-                @click.prevent="handleAddGoods">点击提交</el-button>
+                @click.prevent="handleEditGoods">点击提交</el-button>
             </el-tab-pane>
           </el-tabs>
         </el-form>
@@ -240,6 +239,7 @@ import { quillEditor } from 'vue-quill-editor';
 import 'quill/dist/quill.core.css';
 import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.bubble.css';
+import { BASE_URL } from '@/config';
 
 import {
   Card,
@@ -250,7 +250,6 @@ import {
   Message,
   Row,
   Col,
-  Tag,
   Dialog,
   MessageBox,
   Pagination,
@@ -264,7 +263,8 @@ import {
   Step,
   Tabs,
   TabPane,
-  Alert
+  Alert,
+  Tag
 } from 'element-ui';
 
 Vue.use(Card);
@@ -274,7 +274,6 @@ Vue.use(Button);
 Vue.use(Tooltip);
 Vue.use(Row);
 Vue.use(Col);
-Vue.use(Tag);
 Vue.use(Dialog);
 Vue.use(Pagination);
 Vue.use(Form);
@@ -288,6 +287,7 @@ Vue.use(CheckboxGroup);
 Vue.use(Checkbox);
 Vue.use(Alert);
 Vue.use(Upload);
+Vue.use(Tag);
 
 export default {
   name: 'goodslist',
@@ -296,6 +296,7 @@ export default {
   },
   data() {
     return {
+      uploadUrl: `${BASE_URL}upload`,
       crumbs: [
         { name: '首页', url: '/' },
         { name: '商品管理', url: '/goods' },
@@ -320,6 +321,7 @@ export default {
         pics: [],
         attrs: []
       },
+      currentGoodsId: '',
       goodsCats: [],
       goodsClassifys: [],
       goodsClassifyDefaultProps: {
@@ -332,23 +334,20 @@ export default {
       uploadHeaders: {
         Authorization: localStorage.getItem('business_token')
       },
-      picList: []
+      picList: [],
+      currentPicList: []
     };
   },
   created() {
     this.getGoodsList();
+    this.getCategoryList();
   },
   methods: {
     searchGoods() {
+      this.pagenum = 1;
       this.getGoodsList();
     },
-    handleEdit(row) {
-      const { goods_name: goodsId = '', goods_name: goodsName = '' } = row;
-      if (goodsId !== '' && goodsName) {
-        this.dialogEditGoodsFormVisible = true;
-      }
-    },
-    handleAddGoods() {
+    handleEditGoods() {
       this.goodsForm.goods_cat = this.goodsCats.join(',');
       const dyArr = this.goodsTrendsParmas.map((item) => {
         return {
@@ -363,7 +362,10 @@ export default {
         };
       });
       this.goodsForm.attrs = [...dyArr, ...staticsArr];
-      this.addGoods();
+      this.picList.forEach((item) => {
+        this.goodsForm.pics.push({ pic: item.url });
+      });
+      this.editGoods();
     },
     handleDelete(row) {
       const { goods_name: goodsName = '', goods_id: goodsId = '' } = row;
@@ -389,24 +391,6 @@ export default {
       this.pagenum = val;
       this.getGoodsList();
     },
-    handleTabClick() {
-      const cats = this.goodsCats;
-      if (this.stepActive === '2') {
-        if (cats.length === 3) {
-          this.getParamsList(cats[2]);
-          return;
-        }
-        this.goodsTrendsParmas = [];
-        Message.warning('请选择三级商品分类后再操作');
-      } else if (this.stepActive === '3') {
-        if (cats.length === 3) {
-          this.getStaticParamsList(cats[2]);
-          return;
-        }
-        this.goodsStaticParmas = [];
-        Message.warning('请选择三级商品分类后再操作');
-      }
-    },
     handleUploadSuccess(res) {
       const { data: { tmp_path: pic }, meta: { msg, status } } = res;
       let type = 'warning';
@@ -419,14 +403,78 @@ export default {
         type
       });
     },
-    handleUploadRemove(file, filelist = []) {
-      const list = [];
-      filelist.forEach((item) => {
-        const { response: { data } } = item;
-        list.push(data.tmp_path);
+    handleUploadRemove(file) {
+      const { url } = file;
+      this.picList = this.picList.filter((item) => {
+        return item.url !== url;
       });
-
-      this.goodsForm.pics = list;
+    },
+    clearGoodsForm() {
+      this.goodsForm = {};
+      this.currentGoodsId = '';
+      this.goodsCats = [];
+      this.goodsClassifys = [];
+      this.goodsTrendsParmas = [];
+      this.goodsStaticParmas = [];
+      this.picList = [];
+      this.currentPicList = [];
+    },
+    async handleEdit(row) {
+      const ret = await this.getGoodsInfoById(Number(row.goods_id));
+      if (!ret) {
+        return;
+      }
+      const {
+        pics = [],
+        attrs = [],
+        goods_id: goodsId = '',
+        goods_name: goodsName = '',
+        goods_number: goodsNumber = 0,
+        goods_weight: goodsWeight = 0,
+        goods_price: goodsPrice = 0,
+        cat_one_id: oneId,
+        cat_two_id: twoId,
+        cat_three_id: threeId,
+        goods_introduce: goodsIntroduce
+      } = ret;
+      if (goodsId !== '' && goodsName) {
+        this.dialogEditGoodsFormVisible = true;
+        this.currentGoodsId = Number(goodsId);
+        this.picList = pics.map((item) => {
+          return {
+            url: item.pics_sma || item.pics_mid || item.pics_big
+          };
+        });
+        this.currentPicList = pics.map((item) => {
+          return {
+            url: item.pics_sma_url || item.pics_mid_url || item.pics_big_url
+          };
+        });
+        this.goodsForm = {
+          ...this.goodsForm,
+          goods_name: goodsName,
+          goods_number: goodsNumber,
+          goods_weight: goodsWeight,
+          goods_price: goodsPrice,
+          goods_introduce: goodsIntroduce
+        };
+        if (oneId != null && twoId != null && threeId != null) {
+          this.goodsCats = [oneId, twoId, threeId];
+        }
+        const dyDataList = [];
+        const staticDataList = [];
+        attrs.forEach((item) => {
+          const data = item;
+          if (data.attr_sel === 'many') {
+            data.attr_vals = data.attr_vals && data.attr_vals.split(',');
+            dyDataList.push(data);
+          } else if (data.attr_sel === 'only') {
+            staticDataList.push(data);
+          }
+        });
+        this.goodsTrendsParmas = dyDataList;
+        this.goodsStaticParmas = staticDataList;
+      }
     },
     async getGoodsList() {
       this.loading = true;
@@ -440,6 +488,21 @@ export default {
           this.goodsList = goods;
           this.total = total;
           this.pagenum = Number(pagenum);
+        } else {
+          Message.warning(meta.msg);
+          this.$router.push({ name: 'login' });
+        }
+      }
+    },
+    async getCategoryList(type = 3) {
+      this.loading = true;
+      const result = await this.$http.get(`categories?type=${type}`);
+      this.loading = false;
+      const { data, status } = result;
+      if (status === 200) {
+        const { data: retData, meta } = data;
+        if (meta.status.toString().startsWith('2')) {
+          this.goodsClassifys = retData;
         } else {
           Message.warning(meta.msg);
           this.$router.push({ name: 'login' });
@@ -461,21 +524,33 @@ export default {
         }
       }
     },
-    async addGoods() {
+    async editGoods() {
       this.loading = true;
-      const result = await this.$http.post('goods', this.goodsForm);
+      const result = await this.$http.put(`goods/${this.currentGoodsId}`, this.goodsForm);
       this.loading = false;
       const { data, status } = result;
       if (status === 200) {
         const { meta: { status: state, msg } } = data;
         if (state.toString().startsWith('2')) {
           Message.success(msg);
-          this.$router.push({ name: 'goods' });
+          this.dialogEditGoodsFormVisible = false;
+          this.clearGoodsForm();
+          this.pagenum = 1;
+          this.getGoodsList();
         } else {
           Message.warning(msg);
           this.$router.push({ name: 'login' });
         }
       }
+    },
+    async getGoodsInfoById(id) {
+      const result = await this.$http.get(`goods/${id}`);
+      const { data, status } = result;
+      if (status === 200) {
+        const { data: retData } = data;
+        return retData;
+      }
+      return false;
     }
   }
 };

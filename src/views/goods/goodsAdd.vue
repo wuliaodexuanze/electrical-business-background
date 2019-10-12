@@ -100,7 +100,7 @@
           <el-tab-pane class="tab-pane" name="4" label="商品图片">
             <el-form-item>
               <el-upload
-                action="http://39.108.193.251:8888/api/private/v1/upload"
+                :action="uploadUrl"
                 :headers="uploadHeaders"
                 :file-list="picList"
                 :on-success="handleUploadSuccess"
@@ -157,6 +157,7 @@ import { quillEditor } from 'vue-quill-editor';
 import 'quill/dist/quill.core.css';
 import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.bubble.css';
+import { BASE_URL } from '@/config';
 
 Vue.use(Card);
 Vue.use(Steps);
@@ -178,6 +179,7 @@ export default {
   },
   data() {
     return {
+      uploadUrl: `${BASE_URL}upload`,
       crumbs: [
         { name: '首页', url: '/' },
         { name: '商品管理', url: '/goods' },

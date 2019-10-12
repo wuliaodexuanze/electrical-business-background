@@ -8,6 +8,7 @@ import Permissions from '@/views/permissions/permissions';
 import Roles from '@/views/permissions/roles';
 import Goods from '@/views/goods/goodslist';
 import GoodsAdd from '@/views/goods/goodsAdd';
+import Cateparams from '@/views/goods/cateparams';
 
 Vue.use(Router);
 
@@ -19,29 +20,34 @@ const router = new Router({
       component: Home,
       children: [
         {
-          path: 'users',
+          path: '/users',
           name: 'users',
           component: Users
         },
         {
-          path: 'rights',
+          path: '/rights',
           name: 'rights',
           component: Permissions
         },
         {
-          path: 'roles',
+          path: '/roles',
           name: 'roles',
           component: Roles
         },
         {
-          path: 'goods',
+          path: '/goods',
           name: 'goods',
           component: Goods
         },
         {
-          path: 'goodsadd',
+          path: '/goodsadd',
           name: 'goodsadd',
           component: GoodsAdd
+        },
+        {
+          path: '/params',
+          name: 'cateparams',
+          component: Cateparams
         }
       ]
     },
