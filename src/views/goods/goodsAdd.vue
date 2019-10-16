@@ -27,30 +27,34 @@
           <el-tab-pane class="tab-pane" name="1" label="商品参数">
             <el-form-item
               label="商品名称"
+              prop="goods_name"
               :rules="[{ required: true, message: '商品名称不能为空', trigger: 'blur' }]">
               <el-input
-                v-model="goodsForm.goods_name"
+                v-model.trim="goodsForm.goods_name"
                 placeholder="请输入商品名称"></el-input>
             </el-form-item>
             <el-form-item
               label="商品价格"
+              prop="goods_price"
               :rules="[{ required: true, message: '商品价格不能为空', trigger: 'blur' }]">
               <el-input
-                v-model="goodsForm.goods_price"
+                v-model.trim="goodsForm.goods_price"
                 placeholder="请输入商品价格"></el-input>
             </el-form-item>
             <el-form-item
               label="商品重量"
+              prop="goods_weight"
               :rules="[{ required: true, message: '商品重量不能为空', trigger: 'blur' }]">
               <el-input
-                v-model="goodsForm.goods_weight"
+                v-model.number="goodsForm.goods_weight"
                 placeholder="请输入商品重量"></el-input>
             </el-form-item>
             <el-form-item
               label="商品数量"
+              prop="goods_number"
               :rules="[{ required: true, message: '商品数量不能为空', trigger: 'blur' }]">
               <el-input
-                v-model="goodsForm.goods_number"
+                v-model.number="goodsForm.goods_number"
                 placeholder="请输入商品数量"></el-input>
             </el-form-item>
             <el-form-item
@@ -128,7 +132,7 @@
             <el-button
               class="add-btn"
               type="primary"
-              @click.prevent="handleAddGoods">点击提交</el-button>
+              @click.prevent="handleAddGoods('goodsForm')">点击提交</el-button>
           </el-tab-pane>
         </el-tabs>
       </el-form>
@@ -216,22 +220,28 @@ export default {
     this.getCategoryList();
   },
   methods: {
-    handleAddGoods() {
-      this.goodsForm.goods_cat = this.goodsCats.join(',');
-      const dyArr = this.goodsTrendsParmas.map((item) => {
-        return {
-          attr_id: item.attr_id,
-          attr_value: item.attr_vals
-        };
+    handleAddGoods(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (!valid) {
+          Message.warning('信息填写不完整');
+          return;
+        }
+        this.goodsForm.goods_cat = this.goodsCats.join(',');
+        const dyArr = this.goodsTrendsParmas.map((item) => {
+          return {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals
+          };
+        });
+        const staticsArr = this.goodsStaticParmas.map((item) => {
+          return {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals
+          };
+        });
+        this.goodsForm.attrs = [...dyArr, ...staticsArr];
+        this.addGoods();
       });
-      const staticsArr = this.goodsStaticParmas.map((item) => {
-        return {
-          attr_id: item.attr_id,
-          attr_value: item.attr_vals
-        };
-      });
-      this.goodsForm.attrs = [...dyArr, ...staticsArr];
-      this.addGoods();
     },
     handleUploadSuccess(res) {
       const { data: { tmp_path: pic }, meta: { msg, status } } = res;

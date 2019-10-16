@@ -160,13 +160,14 @@
         <el-form :model="paramsForm" ref="paramsForm">
             <el-form-item
               label="参数名称"
+              prop="attr_name"
               :rules="[
                 { required: true, message: '参数名称不能为空' }
               ]">
               <el-input
                 autocomplete="off"
                 clearable
-                v-model="paramsForm.attr_name"
+                v-model.trim="paramsForm.attr_name"
                 placeholder="请输入参数名"></el-input>
             </el-form-item>
             <el-form-item
@@ -187,7 +188,7 @@
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogCateparamsFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="addCateparamsSubmit">确 定</el-button>
+            <el-button type="primary" @click="addCateparamsSubmit('paramsForm')">确 定</el-button>
           </div>
       </el-dialog>
       <el-dialog
@@ -197,13 +198,14 @@
         <el-form :model="paramsEditForm" ref="paramsEditForm">
             <el-form-item
               label="参数名称"
+              prop="attr_name"
               :rules="[
                 { required: true, message: '参数名称不能为空' }
               ]">
               <el-input
                 autocomplete="off"
                 clearable
-                v-model="paramsEditForm.attr_name"
+                v-model.trim="paramsEditForm.attr_name"
                 placeholder="请输入参数名"></el-input>
             </el-form-item>
             <el-form-item
@@ -224,7 +226,9 @@
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogEditCateparamsFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="editCateparamsSubmit">确 定</el-button>
+            <el-button
+              type="primary"
+              @click="editCateparamsSubmit('paramsEditForm')">确 定</el-button>
           </div>
       </el-dialog>
     </div>
@@ -347,19 +351,29 @@ export default {
         };
       }
     },
-    addCateparamsSubmit() {
-      const reqData = {
-        ...this.paramsForm,
-        attr_sel: this.activeName
-      };
-      if (this.checkedParams()) {
-        this.addCateparams(reqData);
-      } else {
-        Message.warning('添加参数以存在,不能重复添加');
-      }
+    addCateparamsSubmit(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (!valid) {
+          return;
+        }
+        const reqData = {
+          ...this.paramsForm,
+          attr_sel: this.activeName
+        };
+        if (this.checkedParams()) {
+          this.addCateparams(reqData);
+        } else {
+          Message.warning('添加参数以存在,不能重复添加');
+        }
+      });
     },
-    editCateparamsSubmit() {
-      this.updateParams(Number(this.paramsEditForm.attr_id));
+    editCateparamsSubmit(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (!valid) {
+          return;
+        }
+        this.updateParams(Number(this.paramsEditForm.attr_id));
+      });
     },
     handleCategory() {
       if (this.cateparamsCats.length === 3) {

@@ -9,6 +9,9 @@ import Roles from '@/views/permissions/roles';
 import Goods from '@/views/goods/goodslist';
 import GoodsAdd from '@/views/goods/goodsAdd';
 import Cateparams from '@/views/goods/cateparams';
+import Goodscate from '@/views/goods/goodscate';
+import Orders from '@/views/orders/orders';
+import Reports from '@/views/reports/reports';
 
 Vue.use(Router);
 
@@ -48,6 +51,21 @@ const router = new Router({
           path: '/params',
           name: 'cateparams',
           component: Cateparams
+        },
+        {
+          path: '/categories',
+          name: 'categories',
+          component: Goodscate
+        },
+        {
+          path: '/orders',
+          name: 'orders',
+          component: Orders
+        },
+        {
+          path: '/reports',
+          name: 'reports',
+          component: Reports
         }
       ]
     },
